@@ -52,16 +52,31 @@ def my_races(request):
     return render(request, "my_races.html", {"tickets": tickets})
 
 def race(request, race_id):
-    if not request.user.is_authenticated:
-        return redirect("/")
-
     race_data = Races.objects.filter(pk=race_id).first()
     if race_data is None:
         return redirect("/")
 
     ticket_data = Ticket.objects.filter(race=race_data.id, user=request.user.id).first()
-
     booking_data = Bookings.objects.filter(ticket=ticket_data).first()
+
+    if request.method == "POST":
+        if ticket_data is None:
+            return redirect(f"/race/{race_id}")
+
+        place = Places.objects.filter(pk=request.POST["place"]).first()
+        if place is None:
+            return redirect(f"/race/{race_id}")
+
+        if booking_data is None:
+            booking_data = Bookings()
+            booking_data.ticket = ticket_data
+
+        booking_data.place = place
+        booking_data.save()
+
+        return redirect(f"/race/{race_id}")
+    if not request.user.is_authenticated:
+        return redirect("/")
 
     places_data = Places.objects.annotate(
         booked=Exists(Bookings.objects.filter(~Q(ticket__user=request.user.id), place=OuterRef('pk')))

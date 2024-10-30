@@ -1,7 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-  <form class="modal fade" tabindex="-1" id="changeSitting" action="." method="post">
+  <form class="modal fade" tabindex="-1" id="changeSitting" method="post">
+    {% csrf_token %}
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -10,16 +11,16 @@
         </div>
         <div class="modal-body">
           <p>Выберите место</p>
-          <select class="form-select form-select-sm" aria-label="Small select example">
+          <select class="form-select form-select-sm" aria-label="Small select example" name="place">
           {% for place in places %}
-            <option value="{{place}}" {% if place.id == booking.place.id %} selected {% endif %}
+            <option value="{{place.id}}" {% if place.id == booking.place.id %} selected {% endif %}
             {% if place.booked == True %} disabled {% endif %}>{{place.row}}-{{place.col}}</option>
           {% endfor %}
           </select>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
         </div>
       </div>
     </div>
